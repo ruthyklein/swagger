@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+
+    <meta charset='utf-8' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <button id="addButton" onclick="addEvent()">Add Event +</button>
+    <button onclick="removeEvent()">Remove Event</button>
+    <button onclick="updateEvent()">Update Event</button>
+    <div id="buttonContainer"></div>
+    <div id='allEvents'></div>
+    <div id='calendar'></div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        axios.get("https://localhost:7168/api/Events").then(res => {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: res.data,
+            });
+            calendar.render();
+        });
+    });
+function addEvent() {
+        const input1 = document.createElement("input");
+        input1.type = "text";
+        input1.placeholder = "Enter title";
+        buttonContainer.appendChild(input1);
+
+        const input2 = document.createElement("input");
+        input2.type = "date";
+        buttonContainer.appendChild(input2);
+
+        const sendButton = document.createElement("button");
+        sendButton.textContent = "Send";
+        buttonContainer.appendChild(sendButton);
+
+        sendButton.addEventListener("click", function () {
+            axios.post("https://localhost:7168/api/Events", {
+                "title": input1.value,
+                "start": input2.value
+            }).then(res => {
+                console.log(res.data);
+            })
+
+            buttonContainer.removeChild(input1);
+            buttonContainer.removeChild(input2);
+            buttonContainer.removeChild(sendButton);
+            setTimeout(function () {
+                    location.reload();
+                }, 1000);
+        });
+
+    }
+    function removeEvent() {
+        axios.get("https://localhost:7168/api/Events").then(res => {
+            console.log(res.data);
+            const selectElement = document.createElement("select");
+            for (let i = 0; i < res.data.length; i++) {
+                const optionElement = document.createElement("option");
+                optionElement.value = res.data[i].id;
+                optionElement.text = res.data[i].title;
+                selectElement.appendChild(optionElement);
+            }
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.addEventListener("click", function () {
+                const selectedEventId = selectElement.value;
+
+                axios.delete(`https://localhost:7168/api/Events/${selectedEventId}`)
+                    .then(res => {
+                        console.log(res.data);
+
+                    });
+                container.removeChild(selectElement);
+                container.removeChild(deleteButton)
+
+
+            });
+            setTimeout(function () {
+                    location.reload();
+                }, 5000);
+            const container = document.getElementById("allEvents");
+            container.appendChild(selectElement);
+            container.appendChild(deleteButton);
+        });
+    }
+function updateEvent() {
+        axios.get("https://localhost:7168/api/Events").then(res => {
+            const selectElement = document.createElement("select");
+            for (let i = 0; i < res.data.length; i++) {
+                const optionElement = document.createElement("option");
+                optionElement.value = res.data[i].id;
+                optionElement.text = res.data[i].title + " " + res.data[i].id + " " + res.data[i].start + " " + res.data[i].end;
+                selectElement.appendChild(optionElement);
+            }
+            const container = document.getElementById("allEvents");
+            container.appendChild(selectElement);
+            const input1 = document.createElement("input");
+            input1.type = "text";
+            buttonContainer.appendChild(input1);
+            const input2 = document.createElement("input");
+            selectElement.addEventListener("change", (even) => {
+            input1.placeholder = even.target.value;
+            input2.placeholder =even.target.value;
+            })
+            buttonContainer.appendChild(input2);
+            const UpdateButton = document.createElement("button");
+            UpdateButton.textContent = "Update";
+            buttonContainer.appendChild(UpdateButton);
+            input2.addEventListener("mousemove", (event) => {
+                input2.type = "date"
+            });
+            UpdateButton.addEventListener("click", function () {            
+                setTimeout(function () { // טעינת הדף אוטומטית לאחר 5 שניות 
+                    location.reload();
+                }, 5000);
+                axios.put(`https://localhost:7168/api/Events/${selectElement.value}`, {
+                    "title": input1.value,"start": input2.value                  
+                }).then(res => {
+                    console.log(res.data);
+                })
+            })
+        })
+    }
+
+</script>
+
+</html>
