@@ -9,9 +9,13 @@ namespace Swagger.Controllers
     [ApiController]
     public class EventsController : ControllerBase
     {
-        private static int count = 1;
-
-        static DataContext context = new DataContext();
+        private static int count =3;
+        private readonly IDataContext _context;
+        public EventsController(IDataContext context)
+        {
+            _context = context;
+        }
+        //static DataContext context = new DataContext();
         //static List<Event> events = new List<Event>() {
         //    new Event { Id=count++,Title="first",Start=new DateTime(2023,11,01),End=new DateTime(2023,11,02)},
         //    new Event { Id=count++,Title="second",Start=new DateTime(2023,11,02),End=new DateTime(2023,11,03)},
@@ -23,14 +27,14 @@ namespace Swagger.Controllers
         public ActionResult Get()
         {
             //return events;
-            return Ok(context.EventList);
+            return Ok(_context.EventList);
         }
 
         // GET api/<EventsController>/5
         [HttpGet("{id}")]
         public ActionResult Get(int id)
         {
-            var eve= context.EventList.Find(e => e.Id == id);
+            var eve= _context.EventList.Find(e => e.Id == id);
             if (eve is null)
             {
                 return NotFound();
@@ -42,7 +46,7 @@ namespace Swagger.Controllers
         [HttpPost]
         public void Post([FromBody] Event value)
         {
-            context.EventList.Add(new Event { Id = count++, Title=value.Title,Start=value.Start,End=value.End });
+            _context.EventList.Add(new Event { Id = count++, Title=value.Title,Start=value.Start,End=value.End });
         }
       
         // PUT api/<EventsController>/5
@@ -51,11 +55,11 @@ namespace Swagger.Controllers
         {
             for (int i = 0; i <= id; i++)
             {
-                if (context.EventList[i].Id == id)
+                if (_context.EventList[i].Id == id)
                 {
-                    context.EventList[i].Title = value.Title;
-                    context.EventList[i].Start = value.Start;
-                    context.EventList[i].End = value.End;
+                    _context.EventList[i].Title = value.Title;
+                    _context.EventList[i].Start = value.Start;
+                    _context.EventList[i].End = value.End;
                 }
             }
         }
@@ -66,9 +70,9 @@ namespace Swagger.Controllers
         {
             for (int i = 0; i <= id; i++)
             {
-                if (context.EventList[i].Id == id)
+                if (_context.EventList[i].Id == id)
                 {
-                    context.EventList.Remove(context.EventList[i]);
+                    _context.EventList.Remove(_context.EventList[i]);
                 }
             }
             //Event eve = context.EventList.Find(e => e.Id == id);

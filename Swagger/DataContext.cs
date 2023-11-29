@@ -1,8 +1,12 @@
-﻿using Swagger.Controllers;
+﻿using CsvHelper;
+using Microsoft.Extensions.Logging;
+using Swagger.Controllers;
+using System.Formats.Asn1;
+using System.Globalization;
 
 namespace Swagger
 {
-    public class DataContext
+    public class DataContext: IDataContext
     {
 
         public List<Event> EventList { get; set; }
@@ -10,9 +14,13 @@ namespace Swagger
         //all lists - data from DB
         public DataContext()
         {
-            EventList = new List<Event>();
-
-            EventList.Add(new Event { Id = 0, Title = "default" });
+            using (var reader = new StreamReader("data.csv"))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                EventList = csv.GetRecords<Event>().ToList();
+            }
+            //EventList = new List<Event>();
+            //EventList.Add(new Event { Id = 0, Title = "default" });
         }
     }
 }

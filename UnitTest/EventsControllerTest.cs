@@ -6,11 +6,16 @@ namespace UnitTest
 {
     public class EventsControllerTest
     {
+        private readonly EventsController _eventsController;
+        public EventsControllerTest() {
+            var context=new DataContextFake();
+            _eventsController = new EventsController(context);
+        }
         [Fact]
         public void Get_ReturnOk()
         {
-            var controller = new EventsController();
-            var result=controller.Get();
+        
+            var result= _eventsController.Get();
             Assert.IsType<OkObjectResult>(result);
         }
 
@@ -18,8 +23,7 @@ namespace UnitTest
         public void GetById_ReturnNotFound()
         {
             int id = 5;
-            var controller = new EventsController();
-            var result = controller.Get(id);
+            var result = _eventsController.Get(id);
             Assert.IsType<NotFoundResult>(result);    
         }
     }
